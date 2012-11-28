@@ -1,0 +1,66 @@
+/**
+ * Wikimedia Foundation customization for reveal.js
+ *
+ * Copyright © 2012, Wikimedia Foundation.
+ * Authored by Antoine "hashar" Musso for the Wikimedia Foundation.
+ */
+body {
+	/**
+	 *  override anything that might have been previously
+	 *  set in reveal.js theme
+	 */
+	background: none;
+
+	/**
+	 * We are using a multiple background the first one being the
+	 * Wikimedia Foundation logo provided as an SVG, the second
+	 * background is a gray,white,black gradient inspired by
+	 * Wikimedia Foundation employee bags produced in 2012.
+	 */
+
+	background-image: url( 'Wikimedia-logo.svg' ), linear-gradient(left , #202020 75%, #000000 85%);
+	background-image: url( 'Wikimedia-logo.svg' ), -o-linear-gradient(left , #202020 75%, #000000 85%);
+	background-image: url( 'Wikimedia-logo.svg' ), -moz-linear-gradient(left , #202020 75%, #000000 85%);
+	background-image: url( 'Wikimedia-logo.svg' ), -webkit-linear-gradient(left , #202020 75%, #000000 85%);
+	background-image: url( 'Wikimedia-logo.svg' ), -ms-linear-gradient(left , #202020 75%, #000000 85%);
+	background-image: url( 'Wikimedia-logo.svg' ), -webkit-gradient(
+		linear,
+		left bottom,
+		right bottom,
+		color-stop(0.75, #202020),
+		color-stop(0.85, #000000)
+	);
+
+
+	/**
+	 * First value is the logo size which we want to be small
+	 * the second value apply to the gradient.
+	 */
+	background-size: 12% , 100%;
+
+	/** Put the logo to the far right */
+	background-position: 100% 2%;
+
+	background-repeat: no-repeat;
+}
+
+  .reveal h1
+, .reveal h2
+, .reveal h3
+, .reveal h4
+, .reveal h5
+, .reveal h6 {
+	text-shadow: 3px 3px black;
+}
+
+.reveal .progress { height: 15px; }
+.reveal .progress span {
+	background: #069;
+}
+
+.wmfblue  { color: #069; }
+.wmfgreen { color: #396; }
+.wmfred   { color: #900; }
+.red   { color: #F00; }
+.green { color: #0F0; }
+.bold { font-weight: bold; }

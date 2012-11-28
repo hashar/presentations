@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="utf-8" />
+	<title>Wikimedia</title>
+	<meta name="author" content="Antoine Musso" />
+
+	<link rel="stylesheet" href="reveal.js/css/reveal.min.css" />
+	<link rel="stylesheet" href="reveal.js/css/theme/default.css" id="theme" />
+
+	<!-- Syntax highlight: -->
+	<link rel="stylesheet" href="highlight-pablo.css" />
+	<link rel="stylesheet" href="wikimedia.css" />
+	<link rel="stylesheet" href="hashar.css" />
+</head>
+
+<body>
+<div class="reveal">
+<div class="slides">
+	<section>
+		<h2>
+		Gestion de charge<br/>
+		@Wikimedia.org<br/>
+		</h2>
+		<br/>
+		PHP Tour 2012, Nantes, France<br/>
+		<br />
+		<p style="font-size: smaller;">
+		[[User:Hashar|Antoine Musso]]</p>
+		<br/>
+		<br/>
+		<p>Talk is in French.</p>
+		<p>English speakers are welcome to come see me after the talk (tip: I love beer)</p>
+	</section>
+
+	<section>
+		<h2>Wikimedia Foundation</h2>
+
+		<p>A but non lucratif</p>
+		<p>Financé par NOS dons</p>
+		<p>Mission: diffuser les connaissances</p>
+		<br/>
+<div style="
+	width:100%;
+	white-space: nowrap;
+	overflow: hidden;
+	overflow-x:-webkit-marquee;
+	-webkit-marquee-direction: backwards;
+	-webkit-marquee-style: scroll;
+	-webkit-marquee-speed: fast;
+	-webkit-marquee-increment: small;
+
+	overflow-x: marquee-line;
+	marquee-direction: reverse;
+	marquee-style: scroll;
+	marquee-speed: fast;
+" id="projects-marquee">
+<img src="img/commons.png" />
+<img src="img/incubator.png" />
+<img src="img/mediawiki.png" />
+<img src="img/wikibooks.png" />
+<img src="img/wikinews.png" />
+<img src="img/wikipedia.png" />
+<img src="img/wikiquote.png" />
+<img src="img/wikisource.png" />
+<img src="img/wikispecies.png" />
+<img src="img/wikiversity.png" />
+</div>
+
+	</section>
+
+
+	<section>
+		<h2>Chiffres clés</h2>
+
+		<p>Visiteurs: ~ <span class="red bold">500 000 000</span></p>
+		<p><span class="wmfgreen bold">285</span> langues supportées</p>
+		<p>~ <span class="wmfblue bold">24</span> millions d'articles</p>
+		<br/>
+		<p>Employés: ~ <span class="red bold">140</span></p>
+		<p>Budget: ~ <span class="wmfgreen">$30M</span></p>
+		<br/>
+		<a href="http://wikimediafoundation.org/wiki/Key_facts">http://wikimediafoundation.org/wiki/Key_facts</a>
+	</section>
+
+	<section>
+		<h2>Scaling - 2003</h2>
+		<p>Au début un serveur: <a href="http://wikitech.wikimedia.org/view/Pliny">pliny</a>
+		<p>Puis séparation DB:</p>
+		<p><a href="http://wikitech.wikimedia.org/view/Pliny">pliny</a> : MySQL</p>
+		<p><a href="http://wikitech.wikimedia.org/view/Larousse">larousse</a> : le reste (Apache, DNS, IRC...)
+		<br/>
+		<p>Commande de matériel fin 2003 : + 8 serveurs</p>
+	</section>
+
+	<section>2004
+		<img class="white" src="img/Wikimedia-servers-2004-02-19-800wide.png" alt="Wikimedia-servers-2004-02-19-800wide.png" />
+	</section>
+
+	<section>
+	<h1>2004 ... 2012</h1>
+	<div>
+		<img src="img/truck.png" alt="moar servers"
+			style="vertical-align:middle; border:0px; background:none;"/>
+		+ <span class="red bold">700</span> serveurs
+	</span>
+	</div>
+	</section>
+
+	<section>
+		<h2>Nos "ennemis":</h2>
+		<span style="vertical-align: middle;">
+		475M utilisateurs
+		</span>
+		<span style="font-size: 200%; vertical-align:middle;">&nbsp;+</span>
+		<img style="border:none; vertical-align:middle; width:128px; background:none;" src="img/Left_clicked_mouse.svg" />
+	</section>
+
+	<section>
+		<h2>Solutions</h2>
+		<p>Partage de charge généralisé</p>
+		<p>Eviter le language dynamique (PHP/LUA)</p>
+		<p>== rendus en cache</p>
+<br/>
+		<p>... ou optimiser:</p>
+		<pre><code class="language-php" contenteditable>/** kills the servers :-(
+$f = slow_code();
+*/</code></pre>
+	</section>
+
+	<section>
+		<h2>Frontend caching</h2>
+
+		<p>Geo DNS vers un des datacenter</p>
+		<p>LVS frontal</p>
+		<p>Varnish + hash par URL</p>
+		<p>Total: 150 000 req/s</p>
+		<br/>
+		<p>Non cachées: 10 000 req/s</p>
+		<p>Ratio 14/1 :)</p>
+	</section>
+
+	<section>
+		<h2>Frontend caching</h2>
+
+		<p>Séparation des caches:</p>
+			<p>bits.wikimedia.org &rarr; favicon, CSS, JavaScript</p>
+			<p>upload.wikimedia.org &rarr; images &amp; videos</p>
+			<p>*.wikipedia.org &rarr; HTML</p>
+			<br />
+			<p>Ex: bits a tout en mémoire</p>
+			<p>Optimisations specifiques au streaming</p>
+	</section>
+
+	<section>
+		<h2>Backend caching</h2>
+		<p>~ 10 000 req/s</p>
+		<p>MediaWiki s'occupe donc du reste et dispose de caches spécialisés</p>
+		<p>Quelques uns en exemples...</p>
+	</section>
+
+	<section>
+		<h2>MediaWiki - APC</h2>
+
+		<p>1) Cache opcode : attention à la taille du cache! Plusieurs versions de MediaWiki déployées.</p>
+		<p> invalidation = parsing du .php = slow = dead site</p>
+		<p>2) Système de mémoire partagée : nous avons trop de données à y mettre :(<p>
+	</section>
+
+	<section>
+		<h3>MediaWiki - mémoire partagée</h3>
+
+		<p>Memcached : base clé/valeur en mémoire et répartie sur différents serveurs</p>
+		<p>API MediaWiki:</p>
+		<pre><code class="language-php" contenteditable>$key = wfMemcKey( 'class', 'func', 'role' );
+$champs = $wgMemc-&gt;get( $key );
+                   ^^^
+if( !$champs ) {
+  /** opération très longue ... */
+  $wgMemc-&gt;set( $key, $RESULTAT, 3600 * 24 );
+           ^^^
+}</code></pre>
+		Serveurs dédiés: <span class="red">1392 GB</span>
+	</section>
+
+	<section>
+		<h3>MediaWiki - process cache</h3>
+Propriété statique:
+		<pre><code class="language-php">function getStats() {
+  static $stats = null;
+  if( is_null( $stats ) ) {
+    /** opération très longue fstat(), fopen()..*/
+    $stats = $RESULTAT;
+  }
+  return $stats;
+}</pre></code>
+Similaire mais avec une API à la memcached:
+<pre><code class="language-php">$ProcessCache = new HashBagOStuff();
+# Interface identique à celle de Memcached:
+$ProcessCache-&gt;set( wfMemcKey('something'), $RESULTAT );</code></pre>
+
+	</section>
+
+	<section>
+		<h3>MediaWiki - cache en DB</h3>
+		Trop de données / persistance
+<pre><code class="language-php">$hugeCache = ObjectCache::getInstance( CACHE_DB );
+                                       ^^^^^^^^
+# Interface identique à celle de Memcached:
+$hugeCache-&gt;set( wfMemcKey('something'), $RESULTAT );</code></pre>
+</code></pre>
+		<p> Utilisé pour les conserver les données du parser.</p>
+		<p>~ 250 millions enregistrements</p>
+	</section>
+
+	<section>
+		<h3>Problème memcached</h3>
+		<pre><code class="language-php">$srv= crc32(clé) % count( $servers );
+                   ^^^^^^^^^^^^^^^^^
+</code></pre>
+		<p>Donc difficile d'ajouter / retirer des serveurs</p>
+		<p>Données volatiles :-/</p>
+		<p>Peu d'espace (1.3TB)</p>
+	</section>
+
+	<section>
+		<h4>Problème du cache en database</h4>
+		<p>Une seule base : SPOF</p>
+		<p>Absence de LRU:</p>
+		<p>disque plein = crash = cache vide :-D</p>
+		<br />
+		<p>Commun à memcache</p>
+		<p>- Latence réseau :(</p>
+		<p>- Difficile de répliquer entre DC</p>
+	</section>
+
+	<section>
+		<h2>DB distribution</h2>
+		<p>MediaWiki a son propre système de load balancing</p>
+		<pre><code class="language-php"># DB assignée à un cluster
+array( 'enwiki' =&gt; 'clust1' );
+# Chaque cluster à un maitre (load = 0) et un ou plusieurs esclaves:
+array(
+  'clust1' =&gt; array( 'db63' =&gt; 0, 'db59' =&gt; '400' ),
+  'DEFAULT' =&gt; array( 'db34' =&gt; 0, 'db64' =&gt; '200', 'db11' =&gt; '400' ),
+);</code></pre>
+		<p>Pas de sharding (= DB réparties sur plusieurs serveurs)</p>
+	</section>
+
+	<section>
+		<h2>DB distribution</h2>
+		Utilisation:
+		<pre><code class="language-php"># DB assignée à un cluster
+$wgDBname = 'enwiki';
+$write = wfGetDB( DB_MASTER ); // connecté à db63
+$write-&gt;insert( 'table', array('id'=&gt;3) );
+        ^^^^^^
+
+$wgDBname = 'frwiki';
+$read = wfGetDB( DB_SLAVE ); // connecté à db64 ou db11
+$read-&gt;select( 'table', '*', array('id'=&gt;3) );
+       ^^^^^^</code></pre>
+	</section>
+
+	<section>
+		<h2>DB dédiée</h2>
+		Par tâches arbitrairement déterminée:
+<pre><code class="language-php">array( 'enwiki' =&gt; array('contributions' =&gt; 'db36') );
+$wgDBname = 'enwiki';
+wfGetDB( DB_SLAVE, 'contributions' );</code></pre>
+		ou à enregistrer le texte:
+<pre><code class="language-php">array( 'external24' =&gt; array(
+  '10.0.0.1' =&gt; 1, '10.0.0.2' =&gt; 3, '10.0.0.3' =&gt; 3 ) );
+$lb = $repo-&gt;getSlave( 'external24' );
+$lb-&gt;insert( /* id, texte zippé */ );</code></pre>
+		Voir <a href="http://www.mediawiki.org/wiki/Manual:External_Storage">Manual:External_Storage</a>
+	</section>
+
+	<section>
+		<h2>Fil d'attente</h2>
+		<code>slow ? =&gt; async()</code>
+<pre><code class="language-php">foreach( $titles as $title ) {
+  $jobs[] = new DoubleRedirectJob( $title );
+}
+Job::batchInsert( $jobs );</pre></code>
+Sur une dizaine de serveurs:
+<pre><code>
+while true; do
+  php maintenance/runJobs.php;
+  sleep 10;
+done;
+</code></pre>
+	</section>
+
+	<section>
+		<h1>journaux et surveillance</h1>
+	</section>
+
+	<section>
+		<p>Sans données, impossible d'optimiser.</p>
+		<p>prod &gt;&gt;&gt;&gt; dev</p>
+	</section>
+
+	<section>
+		<h2>Profiling PHP</h2>
+
+<table id="profile">
+<tr class="head">
+<td><a href='report.py?db=all&sort=name&limit=50'>name</a></td>
+<td><a href='report.py?db=all&sort=count&limit=50'>count</a></td>
+<td><a href='report.py?db=all&sort=cpu&limit=50'>cpu%</a></td>
+<td><a href='report.py?db=all&sort=onecpu&limit=50'>cpu/c</a></td>
+<td>real%</td>
+<td><a href='report.py?db=all&sort=onereal&limit=50'>real/c</a></td>
+</tr>
+<tr class="data"><td class="name">PPFrame_DOM::expand</td><td>114815074353</td>
+    <td>-3.47</td><td>1.69</td><td>176</td><td>1.84</td></tr>
+<tr class="data"><td class="name">Parser::braceSubstitution</td><td>21806727167</td>
+    <td>-2.91</td><td>7.47</td><td>147</td><td>8.04</td></tr>
+<tr class="data"><td class="name">-total</td><td>507299898</td>
+    <td>100</td><td>-1.1e+04</td><td>100</td><td>235</td></tr>
+<tr class="data"><td class="name">MediaWiki::main</td><td>301305249</td>
+    <td>277</td><td>-5.14e+04</td><td>71.9</td><td>285</td></tr>
+<tr class="data"><td class="name">MediaWiki::performRequest</td><td>278258642</td>
+    <td>277</td><td>-5.57e+04</td><td>52.6</td><td>226</td></tr>
+<tr class="data"><td class="name">Parser::braceSubstitution-pfunc</td><td>20072121945</td>
+    <td>-0.847</td><td>2.36</td><td>42.4</td><td>2.53</td></tr>
+<tr class="data"><td class="name">MediaWiki::performAction</td><td>193131533</td>
+    <td>-0.641</td><td>186</td><td>37.2</td><td>230</td></tr>
+<tr class="data"><td class="name">Parser::internalParse</td><td>730328447</td>
+    <td>-0.71</td><td>54.4</td><td>35.9</td><td>58.8</td></tr>
+<tr class="data"><td class="name">Parser::parse</td><td>596950291</td>
+    <td>-0.658</td><td>61.7</td><td>33.7</td><td>67.5</td></tr>
+<tr class="data"><td class="name">Parser::replaceVariables</td><td>4700368966</td>
+    <td>-0.593</td><td>7.06</td><td>30.3</td><td>7.71</td></tr>
+<tr class="data"><td class="name">Article::view</td><td>158010708</td>
+    <td>-0.5</td><td>177</td><td>26.8</td><td>203</td></tr>
+<tr class="data"><td class="name">Parser::braceSubstitution-setup</td><td>21806662227</td>
+    <td>-0.472</td><td>1.21</td><td>24.1</td><td>1.32</td></tr>
+<tr class="data"><td class="name">api.php</td><td>212911870</td>
+    <td>-0.234</td><td>61.4</td><td>19.3</td><td>108</td></tr>
+</table>
+<p>Filtres: preprod, branche de prod, regroupement fonctionel</p>
+		<a href="http://noc.wikimedia.org/cgi-bin/report.py">http://noc.wikimedia.org/cgi-bin/report.py</a>
+		<p>Futur: facebook/xhprof</p>
+	</section>
+
+	<section>
+		<h3>Code pour profiler</h3>
+		<pre><code class="language-php" contenteditable>function slowHorse() {
+  wfProfileIn( __METHOD__ );
+
+    wfProfileIn( __METHOD__ . '-pass1' );
+    // Plein de code lent
+    wfProfileOut( __METHOD__ . '-pass1' );
+
+    wfProfileIn(  __METHOD__ . '-pass2' );
+    // Encore du code lent
+    wfProfileOut( __METHOD__ . '-pass2' );
+
+  wfProfileOut( __METHOD__ );
+}</code></pre>
+	<p>Permet de récupérer un arbre d'appel voir de l'analyser avec Valgrind.</p>
+	<p>Sauvegardé en base de données</p>
+	</section>
+
+	<section>
+	<p>Classe API, top 10 / max 90% time sur un jour</p>
+<img class="white" src="img/graphite-api.png" />
+
+		<a href="https://gdash.wikimedia.org/">https://gdash.wikimedia.org/</a>&nbsp;(public)
+	</section>
+
+	<section>
+		<h3>Profile SQL</h3>
+		<p><code>pt-query-digest</code> analyse les logs MySQL.</p>
+		<p>Permet de produire des rapports de performances / nombre de requêtes...</p>
+		<br/>
+		<a href="http://www.percona.com/software/percona-toolkit">http://www.percona.com/software/percona-toolkit</a>
+	</section>
+
+	<section>
+		<h3>Ishmael</h3>
+		Interface graphique pour <code>pt-query-digest</code>
+		<img class="white" src="img/ishmael.png" />
+		<a href="https://github.com/mihasya/ishmael">https://github.com/mihasya/ishmael</a>
+	</section>
+
+	<section>
+		<h1>Installation<h1><h1>matériel</h1>
+	</section>
+
+	<section>
+	<h2>Installer rapidement</h2>
+	<ol>
+		<li>racker + installer la distrib
+		<li>indiquer le nom de la machine
+		<li>brancher le réseau
+		<li><code>puppetd -tv</code>
+		<li>Success!
+	</ol>
+	</section>
+
+	<section>
+	<h2>puppet</h2>
+<pre><code class="language-ruby"> node /mw[0-9]+\.pmtpa\.wmnet/ {
+	include role::applicationserver::appserver
+}</code></pre>
+L'administration des machines devient un logiciel à développer. Process connus, moins d'erreurs, gain de temps, machines faciles à réinstaller ou répliquer.
+	</section>
+
+
+	<section>
+	<h2>question.php</h2>
+<pre><code class="language-php">$Public-&gt;setTimeout( '10 minutes' );
+
+do {
+
+  $question = $Public-&gt;getQuestion();
+
+  try {
+    self::answer( $question );
+  } catch( TooComplicated( $e ) {
+    continue;
+  }
+
+} while( $question );
+echo 'hashar' . chr(64) . 'free.fr';
+</code></pre>
+	</section>
+
+	<!--
+	<section data-markdown>
+		## Title
+
+		```language-php
+		$var = 'markdown';
+		```
+	</section>
+	-->
+
+<div><!-- class="slides" -->
+
+</div><!-- class="reveal" -->
+
+
+<script src="reveal.js/lib/js/head.min.js"></script>
+<script src="reveal.js/js/reveal.js"></script>
+
+		<script type="text/javascript">
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: false,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/none
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'reveal.js/plugin/markdown/showdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+				]
+			});
+		</script>
+
+	</body>
+</html>
