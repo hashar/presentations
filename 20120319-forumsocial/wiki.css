@@ -1,0 +1,44 @@
+.deck-container {
+	background: #f9f9f9 url(headbg.jpg) 0 0 no-repeat;
+}
+
+.deck-container .slide h1, .deck-container .slide h2, .deck-container .slide h3, .deck-container .slide h4, .deck-container .slide h5, .deck-container .slide h6 {
+	font-family: "Gill Sans";
+}
+
+.slide p,
+.slide li,
+.slide table {
+	font-size: 150%;
+}
+
+.slide td {
+	border: 1px solid black;
+	padding: 0.2em 0.4em;
+}
+
+table.noborder td {
+	border: none;
+}
+
+.deck-container b{
+	font-weight: bold;
+}
+.deck-container i{
+	font-style: italic;
+}
+
+a.article
+{
+	color:blue !important;
+	text-decoration: underline !important;
+}
+a.redlink
+{
+	color:red !important;
+	text-decoration: underline !important;
+}
+
+pre.fit { padding:0; margin:0; }
+
+
